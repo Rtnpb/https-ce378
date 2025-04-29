@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AES Encryption</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+</head>
+<body>
+    <h2>AES Encryption/Decryption</h2>
+    
+    <!-- ช่องกรอก Key -->
+    <label for="key">Encryption Key:</label>
+    <input type="text" id="key" placeholder="Enter 16-byte key">
+    <br><br>
+    
+    <!-- ช่องกรอกข้อความที่จะเข้ารหัส -->
+    <label for="plaintext">Text to Encrypt:</label>
+    <input type="text" id="plaintext" placeholder="Enter text">
+    <button onclick="encryptMessage()">Encrypt</button>
+    <p>Encrypted (Hex): <span id="encrypted"></span></p>
+
+    <!-- ช่องกรอกข้อความที่จะถอดรหัส -->
+    <label for="ciphertext">Text to Decrypt:</label>
+    <input type="text" id="ciphertext" placeholder="Enter encrypted text">
+    <button onclick="decryptMessage()">Decrypt</button>
+    <p>Decrypted: <span id="decrypted"></span></p>
+
+    <script>
+        // ฟังก์ชันเข้ารหัสข้อความ
+        function encryptText(plainText, key, iv) {
+            const keyBytes = CryptoJS.enc.Utf8.parse(key);
+            const ivBytes = CryptoJS.enc.Utf8.parse(iv);
+            const encrypted = CryptoJS.AES.encrypt(plainText, keyBytes, {
+                iv: ivBytes,
+                mode: CryptoJS.mode.CBC, // ใช้ CBC mode
+                padding: CryptoJS.pad.Pkcs7 // ใช้ padding แบบ PKCS7
+            });
+            return encrypted.ciphertext.toString(); // ส่งคืนผลลัพธ์เป็น Hex
+        }
+
+        // ฟังก์ชันถอดรหัสข้อความ
+        function decryptText(cipherText, key, iv) {
+            const keyBytes = CryptoJS.enc.Utf8.parse(key);
+            const ivBytes = CryptoJS.enc.Utf8.parse(iv);
+            const encryptedHex = CryptoJS.enc.Hex.parse(cipherText);
+            const cipherBase64 = CryptoJS.enc.Base64.stringify(encryptedHex);
+            const decrypted = CryptoJS.AES.decrypt(cipherBase64, keyBytes, {
+                iv: ivBytes,
+                mode: CryptoJS.mode.CBC, // ใช้ CBC mode
+                padding: CryptoJS.pad.Pkcs7 // ใช้ padding แบบ PKCS7
+            });
+            return decrypted.toString(CryptoJS.enc.Utf8); // ส่งคืนข้อความที่ถอดรหัส
+        }
+
+        // ฟังก์ชันเข้ารหัสเมื่อผู้ใช้คลิก
+        function encryptMessage() {
+            const key = document.getElementById('key').value;
+            const iv = '1234567890123456'; // IV ขนาด 16 bytes คงที่
+            if (key.length !== 16) { // ตรวจสอบขนาดของคีย์
+                alert("Key must be 16 characters long.");
+                return;
+            }
+            const plaintext = document.getElementById('plaintext').value;
+            const encryptedText = encryptText(plaintext, key, iv);
+            document.getElementById('encrypted').innerText = encryptedText;
+        }
+
+        // ฟังก์ชันถอดรหัสเมื่อผู้ใช้คลิก
+        function decryptMessage() {
+            const key = document.getElementById('key').value;
+            const iv = '1234567890123456'; // IV ขนาด 16 bytes คงที่
+            if (key.length !== 16) { // ตรวจสอบขนาดของคีย์
+                alert("Key must be 16 characters long.");
+                return;
+            }
+            const ciphertext = document.getElementById('ciphertext').value;
+            const decryptedText = decryptText(ciphertext, key, iv);
+            document.getElementById('decrypted').innerText = decryptedText;
+        }
+    </script>
+</body>
+</html>
